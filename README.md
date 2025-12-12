@@ -1,8 +1,8 @@
-# Easy and (somewhat) fast Lidar Point Cloud Imporer for Blender 5.0
+# Easy and (somewhat) fast Lidar Point Cloud Importer for Blender 5.0
 
-This blender extension  aims to provide a one-click solution for importing .las and .laz to blender. 
+This blender extension  aims to provide a one-click solution for importing .las and .laz files to blender. 
 
-This addon is heavily inspired by the work of @nittanygeek and his [Lidar-Importer](https://github.com/nittanygeek/LiDAR-Importer). However, I've rewritten everything from scratch to make sure it fits the new extension architecture and it will be easier to maintain. 
+This addon is heavily inspired by the work of [@nittanygeek](https://github.com/nittanygeek) and his [Lidar-Importer](https://github.com/nittanygeek/LiDAR-Importer). However, I've rewritten everything from scratch to make sure it fits the new extension architecture and it will be easier to maintain. 
 
 In its current state, the extension supports :
 - Import as native point cloud object
