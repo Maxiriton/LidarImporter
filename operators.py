@@ -179,20 +179,46 @@ class IMPORT_OT_las_data(Operator, ImportHelper): # type: ignore
         maxys = []
         maxzs = []
         for obj in imported_objects:
-            minxs.append(obj['x_min']* obj['x_scale'] + obj['x_offset'])
-            minys.append(obj['y_min']* obj['y_scale'] + obj['y_offset'])
-            minzs.append(obj['z_min']* obj['z_scale'] + obj['z_offset'])
-            maxxs.append(obj['x_max']* obj['x_scale'] + obj['x_offset'])
-            maxys.append(obj['y_max']* obj['y_scale'] + obj['y_offset'])
-            maxzs.append(obj['z_max']* obj['z_scale'] + obj['z_offset'])
+            x_min = obj['x_min']* obj['x_scale'] + obj['x_offset']
+            y_min = obj['y_min']* obj['y_scale'] + obj['y_offset']
+            z_min = obj['z_min']* obj['z_scale'] + obj['z_offset']
+            x_max = obj['x_max']* obj['x_scale'] + obj['x_offset']
+            y_max = obj['y_max']* obj['y_scale'] + obj['y_offset']
+            z_max = obj['z_max']* obj['z_scale'] + obj['z_offset']
 
-        minp = Vector((min(minxs), min(minys), min(minzs)))
-        maxp = Vector((max(maxxs), max(maxys), max(maxzs)))
-        center = (minp + maxp) / 2.0
-        if not self.center_vertically:
-            center = Vector((center.x, center.y, 0))
+            obj['pos_min'] = Vector((x_min, y_min, z_min))
+            obj['pos_max'] = Vector((x_max, y_max, z_max))
+
+            minxs.append(x_min)
+            minys.append(y_min)
+            minzs.append(z_min)
+            maxxs.append(x_max)
+            maxys.append(y_max)
+            maxzs.append(z_max)
+
+        if not bpy.context.scene.get('laz_center'):
+            minp = Vector((min(minxs), min(minys), min(minzs)))
+            maxp = Vector((max(maxxs), max(maxys), max(maxzs)))
+            center = (minp + maxp) / 2.0
+            if not self.center_vertically:
+                center = Vector((center.x, center.y, 0))
+
+            bpy.context.scene['laz_center'] = center
+        
+        center = Vector(bpy.context.scene['laz_center'])
         for obj in imported_objects:
-            obj.location -= Vector(center)
+            obj.location -= center
+            #we also need to update the object's orginin location
+            with bpy.context.temp_override(object=obj,
+                                           active_object=obj,
+                                           selected_objects=[obj],
+                                           selected_editable_objects=[obj],
+                                           mode='OBJECT') as ctx: # type: ignore
+                new_origin = (Vector(obj['pos_min']) + Vector(obj['pos_max'])) / 2.0 - center
+                bpy.context.scene.cursor.location = new_origin
+                bpy.ops.object.origin_set(type='ORIGIN_CURSOR')
+                
+                
 
 def menu_func_import(self, context):
     self.layout.operator(IMPORT_OT_las_data.bl_idname, text="LAS/LAZ data (.las, .laz)")
